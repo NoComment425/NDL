@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scryfall Search Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: #1e1e1e; padding: 10px; border-radius: 8px; text-align: center; }
+        .card img { max-width: 100%; height: auto; border-radius: 4px; }
+        .status { font-size: 1.2rem; color: #bbb; margin-bottom: 10px; }
+        .error { color: #ff5555; font-weight: bold; font-family: monospace; }
+        .success { color: #55ff55; font-weight: bold; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+    <h1>Scryfall Results</h1>
+    <div id="status" class="status">Processing request...</div>
+    <div id="results" class="grid"></div>
+
+    <script>
+        async function fetchScryfallData() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+
+            // 1. Get the 'q' parameter from your page's URL
+            const params = new URLSearchParams(window.location.search);
+            const query = params.get('q');
+
+            if (!query) {
+                statusDiv.innerHTML = `<span class="error">HTTP/1.1 400 Bad Request</span><br>Error: Missing query parameter (?q=your-search-term)`;
+                return;
+            }
+
+            try {
+                // 2. Query Scryfall's official public API endpoint
+                const apiUrl = `https://scryfall.com{encodeURIComponent(query)}`;
+                const response = await fetch(apiUrl);
+                
+                // 3. Check for error codes (like 404 if no cards are found)
+                if (!response.ok) {
+                    statusDiv.innerHTML = `<span class="error">HTTP/1.1 ${response.status} ${response.statusText}</span><br>Scryfall API returned an error code. No matching cards found.`;
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // 4. If successful, display the 200 OK status briefly and clear it or keep it as a subheader
+                statusDiv.innerHTML = `<span class="success">HTTP/1.1 200 OK</span> — Found ${data.total_cards} cards.`;
+
+                // 5. Loop through results and display card names and artwork
+                data.data.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+
+                    // Check if card has an image (handles double-faced card edge cases)
+                    const imageUrl = card.image_uris ? card.image_uris.normal : (card.card_faces ? card.card_faces[0].image_uris.normal : '');
+
+                    cardElement.innerHTML = `
+                        <h3>${card.name}</h3>
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}">` : '<p>No image available</p>'}
+                    `;
+                    resultsDiv.appendChild(cardElement);
+                });
+
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">HTTP/1.1 500 Internal Server Error</span><br>Failed to connect to the API.`;
+            }
+        }
+
+        // Run the function when the page loads
+        fetchScryfallData();
+    </script>
+</body>
+</html>
