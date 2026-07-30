@@ -37,9 +37,10 @@
             try {
                 // 2. Query Scryfall's official public API endpoint
                 const apiUrl = `https://scryfall.com/cards/search{encodeURIComponent(query)}`;
+                console.log(apiUrl);
                 const response = await fetch(apiUrl);
 
-                console.log(apiUrl);
+                
                 
                 // 3. Check for error codes (like 404 if no cards are found)
                 if (!response.ok) {
