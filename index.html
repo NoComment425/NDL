@@ -28,7 +28,6 @@
             // 1. Get the 'q' parameter from your page's URL
             const params = new URLSearchParams(window.location.search);
             const query = params.get('q');
-            console.log(q);
 
             if (!query) {
                 statusDiv.innerHTML = `<span class="error">HTTP/1.1 400 Bad Request</span><br>Error: Missing query parameter (?q=your-search-term)`;
@@ -38,7 +37,6 @@
             try {
                 // 2. Query Scryfall's official public API endpoint
                 const apiUrl = `https://api.scryfall.com/cards/search{encodeURIComponent(query)}`;
-                console.log(apiUrl);
                 const response = await fetch(apiUrl);
 
                 
