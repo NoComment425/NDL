@@ -37,7 +37,7 @@
 
             try {
                 // 2. Query Scryfall's official public API endpoint
-                const apiUrl = `https://scryfall.com/cards/search{encodeURIComponent(query)}`;
+                const apiUrl = `https://api.scryfall.com/cards/search{encodeURIComponent(query)}`;
                 console.log(apiUrl);
                 const response = await fetch(apiUrl);
 
